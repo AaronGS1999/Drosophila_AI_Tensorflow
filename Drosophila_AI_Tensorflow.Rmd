@@ -1,14 +1,70 @@
 ---
-title: "Drosophila & Tensorflow"
+title: "Training and Running TensorFlow Models on Google Colab"
 author: "Aaron Gálvez Salido"
 date: "`r Sys.Date()`"
 output:
   prettydoc::html_pretty:
     theme: cayman
     highlight: github
+    toc: true
+    number_sections: true
+    toc_depth: '3'
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
+# First Steps
+
+## What is Google Colab?
+
+Google Colab works by allowing users to write and execute Python code in a Jupyter notebook environment hosted on the cloud. It provides free access to computing resources, including CPUs, GPUs, and TPUs, which can significantly accelerate computational tasks. Users can create, share, and collaborate on notebooks in real-time, making it an excellent tool for educational purposes, data analysis, machine learning, and research. Colab also integrates seamlessly with Google Drive, enabling easy saving and sharing of projects.
+
+## How do I access Google Colab?
+
+The first thing is to have a Google account, and to access Google Colab, it's as simple as opening a web browser, going to <https://colab.google/>, and clicking the "Open Colab" button. This will open a new page where you can create a new Google Colab document.
+
+## What is Tensorflow?
+
+TensorFlow is an open-source machine learning framework developed by Google. It allows users to build and train various machine learning models, ranging from simple to complex, using computational graphs. TensorFlow is widely used for tasks such as classification, regression, neural networks, and more, across different platforms and devices.
+
+# Training a TensorFlow model in Google Colab
+
+Next, we will explain how to train a TensorFlow model in Google Colab to detect objects, specifically distinguishing between wild-type flies and white-type flies.
+
+## Dataset preparation
+
+First of all, you need a set of photographs that include the flies. To capture the pictures, we used a Bysameyee 8-SA-00 digital microscope, which provides more detailed photos. Additionally, we used a Canon EOS 70D camera with a 100mm macro objective f/2.8L lens in the experiment. We also used cardboard of different colors as backgrounds, which helped to improve accuracy. The images from the Canon camera were quite large and couldn't be processed by the model, so they were divided into equally sized fragments using a Python code:
+
+```{python}
+import image_slicer
+from PIL import Image
+path = "" # add the full path of the image
+n = 20 # number of pieces
+image_slicer.slice(path, n)
+```
+
+After this, the images will be divided into three different folders using another Python code:
+
+```{python}
+import splitfolders
+folder = "" # Add the address of your folders, keep in mind that they must have a specific structure of the library
+splitfolders.ratio(folder, output="output", seed=1999, ratio=(.8, 0.1, 0.1)) 
+```
+
+This code will divide the images into 3 folders: 80% of the total images will be used for training the model, 10% for validation during training, and 10% will be reserved for external checks.
+
+## Labeling
+
+The last step in dataset preparation was to define what the AI needed to learn. This was done using the open-source program LabelImage (<https://github.com/tzutalin/labelImg>). The program allows flies to be labeled and classified as wild type or white type in a graphical interface. An .xml file is generated in pascal voc format, which records the label and coordinates of the flies in the image. This labeling process is done for all images in the training and validation folders.
+
+![](images/labeling.jpg)
+
+## Increased training efficiency (optional but strongly recommended):
+
+To enhance the training performance, two techniques were applied to the dataset using the roboflow web platform ([https://roboflow.com](https://roboflow.com/)). The first technique involved automatically combining image fragments to improve the detection of small targets. The second technique involved artificially introducing noise into the photos to enhance their resilience to photo artifacts. An example of this is the following image with 5% noise.
+
+![](images/improvements_example.jpg)
+
+After applying these improvements, in our case, we got 1251 photos for training and 55 photos for validation.
