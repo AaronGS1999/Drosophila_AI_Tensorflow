@@ -72,3 +72,145 @@ To enhance the training performance, two techniques were applied to the dataset 
 ![](images/improvements_example.jpg)
 
 After applying these improvements, in our case, we got 1251 photos for training and 55 photos for validation.
+
+## Google Colab preparation
+
+In the following link, there is already a [Google Colab](https://colab.research.google.com/drive/1SdoGigd8u9fq0PAgp6AqXftFHUAuaNqb?usp=sharing) prepared to train Tensorflow models, but here we will explain it step by step.
+
+The first step is to change the runtime type because we will need to use a GPU. To do this, click on Runtime \> Change runtime type at the top, and a menu will open where you can select a GPU.
+
+## Mount google drive on Google Colab notebook
+
+In a code block, you should add the following lines:
+
+``` Python
+from google.colab import drive
+drive.mount("/content/gdrive")
+```
+
+When you run this code block with the play button, it will ask for some permissions, and after granting them, you will have a connection between the Google Colab notebook and Drive. Finally, we connect to Google's resources by clicking the connect button.
+
+## Virtual environment preparation
+
+When connecting to the environment, Google Colab already has numerous libraries loaded for both Python and R. However, in our case, to avoid conflicts between packages, we are going to create a virtual environment using Miniconda. To do this, we need to add the following lines to a code block and execute it:
+
+``` Python
+%env PYTHONPATH = # /env/python
+!wget https://repo.anaconda.com/miniconda/Miniconda3-py38_4.12.0-Linux-x86_64.sh
+!chmod +x Miniconda3-py38_4.12.0-Linux-x86_64.sh
+!./Miniconda3-py38_4.12.0-Linux-x86_64.sh -b -f -p /usr/local
+!conda update conda -y
+import sys
+sys.path.append('/usr/local/lib/python3.8/site-packages')
+!conda create -n tensorflowenv python=3.8 -y
+```
+
+This will create a virtual environment called `tensorflowenv` with Python 3.8. Next, in another code block, we will insert the necessary packages and install them by running the code cell:
+
+``` Python
+%%shell
+eval "$(conda shell.bash hook)"
+conda activate tensorflowenv
+pip install tflite-model-maker==0.3.4 tflite-support==0.3.1 tensorflow==2.6.0 keras==2.6.0 tensorflow-estimator==2.6.0 ipykernel pycocotools
+conda install -c conda-forge cudatoolkit=11.2 cudnn=8.1.0 -y
+```
+
+Although the package versions are old, they are the ones we have tested and confirmed to work.
+
+## Generating the Python script and execute it
+
+To generate the Python script, in a cell we will include the following lines of code for Import of necessary libraries:
+
+``` Python
+%%writefile  training.py
+import numpy as np
+import os
+
+
+
+from tflite_model_maker.config import ExportFormat, QuantizationConfig
+from tflite_model_maker import model_spec
+from tflite_model_maker import object_detector
+
+from tflite_support import metadata
+
+import tensorflow as tf
+assert tf.__version__.startswith('2')
+
+tf.get_logger().setLevel('ERROR')
+from absl import logging
+logging.set_verbosity(logging.ERROR)
+```
+
+Using `%%writefile training.py` creates a temporary script named `traing.py`.
+
+Continuing with the script, we add the remaining lines of code that will perform the training, pre-exportation validation, and post-exportation validation of the model:
+
+``` Python
+%%writefile  -a training.py
+# pathways and name of tensorflow lite model
+training_path = "/content/gdrive/MyDrive/drosophila_white_wild_v7_V2/training"
+validation_path ="/content/gdrive/MyDrive/drosophila_white_wild_v7_V2/validation"
+tflite_filename="drosophila_lite2_epochs120_batch16_img1251_wild_white_v7_V2.tflite"
+
+# Selecting the model architecture
+spec = model_spec.get('efficientdet_lite2')
+
+# data upload
+training_data = object_detector.DataLoader.from_pascal_voc(
+    training_path,
+    training_path,
+    ["white type", "wild type"]
+)
+validation_data = object_detector.DataLoader.from_pascal_voc(
+    validation_path,
+    validation_path,
+    ["white type", "wild type"]
+)
+
+
+# Training
+model = object_detector.create(training_data, model_spec=spec, epochs=120, batch_size=16, train_whole_model=True, validation_data=validation_data)
+
+# Export model
+model.export(export_dir=".", tflite_filename=tflite_filename)
+
+
+# Model evaluation
+print( model.evaluate(validation_data))
+
+# Exported model evaluation
+print(model.evaluate_tflite(tflite_filename, validation_data))
+```
+
+Using `%%writefile -a training.py` adds the remaining lines of code to the temporary script.
+
+In Google Drive, you should have the folders specified in this part of the code with the dataset:
+
+``` Python
+training_path = "/content/gdrive/MyDrive/drosophila_white_wild_v7_V2/training"
+validation_path ="/content/gdrive/MyDrive/drosophila_white_wild_v7_V2/validation"
+```
+
+The variable `tflite_filename` refers to the name that the trained model will have.
+
+In a new code block, we will use the virtual environment tensorflowenv created earlier to execute the temporary script:
+
+``` Python
+%%shell
+eval "$(conda shell.bash hook)"
+conda activate tensorflowenv
+python3 training.py
+```
+
+## Export model
+
+To export the model from Google Colab, you can do it with the following code:
+
+``` Python
+from google.colab import files
+tflite_filename="drosophila_lite2_epochs120_batch16_img1251_wild_white_v7_V2.tflite"
+files.download(tflite_filename)
+```
+
+The name of the model established previously must match with `tflite_filename`.
