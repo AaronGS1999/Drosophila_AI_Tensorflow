@@ -202,7 +202,7 @@ The variable `tflite_filename` refers to the name that the trained model will ha
 
 The part of the code where the architecture to be trained is specified is:
 
-``` Python
+``` python
 # Selecting the model architecture
 spec = model_spec.get('efficientdet_lite2')
 ```
@@ -210,7 +210,7 @@ spec = model_spec.get('efficientdet_lite2')
 There are 5 different types of models, some smaller and faster, and others larger and slower for performing inference. Additionally, the larger ones require more GPU resources:
 
 ```{r echo=FALSE}
-
+library(kableExtra) # Para las tablas
 model <- c("EfficientDet-Lite0", "EfficientDet-Lite1", "EfficientDet-Lite2", "EfficientDet-Lite3", "EfficientDet-Lite4")
 size_mb <- c(4.4, 5.8, 7.2, 11.4, 19.9)
 latency_ms <- c(37, 49, 69, 116, 260)
@@ -220,9 +220,57 @@ average_precision <- c("25.69%", "30.55%", "33.97%", "37.70%", "41.96%")
 df <- data.frame(Model = model, `Size(MB)` = size_mb, `Latency(ms)` = latency_ms, `Average Precision` = average_precision)
 
 
-print(df)
+df %>%
+  kbl(caption = "Types of models") %>% kable_classic(full_width = F, html_font = "Cambria")
 
 ```
+
+In this section, the training and validation data are loaded. Here, the labels must match those specified in the labeling section:
+
+``` Python
+# data upload
+training_data = object_detector.DataLoader.from_pascal_voc(
+    training_path,
+    training_path,
+    ["white type", "wild type"]
+)
+validation_data = object_detector.DataLoader.from_pascal_voc(
+    validation_path,
+    validation_path,
+    ["white type", "wild type"]
+)
+```
+
+Here, the labels are white type and wild type.
+
+To configure how the training will be performed, the following lines of code must be modified:
+
+``` Python
+# Training
+model = object_detector.create(training_data, model_spec=spec, epochs=120, batch_size=16, train_whole_model=True, validation_data=validation_data)
+```
+
+Usually, only the values of the following variables need to be modified:
+
+-   **Epochs:** An epoch refers to one complete cycle through the entire training dataset. During training, the model processes all the training data once per epoch. Multiple epochs are often used to improve the model’s performance, as each epoch allows the model to learn and adjust its parameters based on the data.
+
+-   **Batch Size**: Batch size is the number of training examples utilized in one iteration of training. Instead of processing the entire dataset at once, the training data is divided into smaller batches, and the model updates its parameters after each batch. A smaller batch size typically requires more iterations to complete one epoch, while a larger batch size reduces the number of iterations but requires more memory.
+
+In the section of the code detailed below, the model is exported and validated before and after being exported:
+
+``` Python
+# Export model
+model.export(export_dir=".", tflite_filename=tflite_filename)
+
+
+# Model evaluation
+print( model.evaluate(validation_data))
+
+# Exported model evaluation
+print(model.evaluate_tflite(tflite_filename, validation_data))
+```
+
+The training results are analyzed using [COCO metrics](https://cocodataset.org/#detection-eval), which will give us an idea of the object detection accuracy. For this purpose, it uses the images from the validation folder.
 
 In a new code block, we will use the virtual environment tensorflowenv created earlier to execute the temporary script:
 
@@ -247,6 +295,6 @@ The name of the model established previously must match with `tflite_filename`.
 
 ## Trained models
 
-Numerous models have been trained with different datasets as can be seen [here](https://github.com/AaronGS1999/Drosophila_AI_Tensorflow/tree/bb9daa4bdf4ee11b76e887b3137faa154f2456af/Trained%20models). However, the five available architectures trained with our most comprehensive dataset are located [here](https://github.com/AaronGS1999/Drosophila_AI_Tensorflow/tree/bb9daa4bdf4ee11b76e887b3137faa154f2456af/best%20models).
+Numerous models have been trained with different datasets as can be seen [here](https://github.com/AaronGS1999/Drosophila_AI_Tensorflow/tree/bb9daa4bdf4ee11b76e887b3137faa154f2456af/Trained%20models). However, the five available architectures trained with our most longest dataset are located [here](https://github.com/AaronGS1999/Drosophila_AI_Tensorflow/tree/bb9daa4bdf4ee11b76e887b3137faa154f2456af/best%20models). The metrics for these can be seen here.
 
 # Image processing with pre-trained tensorflow model
