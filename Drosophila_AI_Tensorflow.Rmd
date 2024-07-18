@@ -31,7 +31,7 @@ TensorFlow is an open-source machine learning framework developed by Google. It 
 
 # Training a TensorFlow model in Google Colab
 
-Next, we will explain how to train a TensorFlow model in Google Colab to detect objects, specifically distinguishing between wild-type flies and white-type flies.
+Next, we will explain how to train a TensorFlow model in Google Colab to detect objects, specifically distinguishing between wild-type flies and white-type flies. Also, in the following sections, datasets will be provided for labeling or a dataset already labeled and ready to be uploaded to Drive and used for training.
 
 ## Dataset preparation
 
@@ -41,7 +41,7 @@ First of all, you need a set of photographs that include the flies. To capture t
 
 ![](images/scale.jpg){width="552"}
 
-``` Python
+``` python
 import image_slicer
 from PIL import Image
 path = "" # add the full path of the image
@@ -55,7 +55,7 @@ The captured images in this format, which can be used for the tutorial, are avai
 
 After this, the images will be divided into three different folders using another Python code:
 
-``` Python
+``` python
 import splitfolders
 folder = "" # Add the address of your folders
 splitfolders.ratio(folder, output="output", seed=1999, ratio=(.8, 0.1, 0.1))
@@ -69,15 +69,15 @@ The last step in dataset preparation was to define what the AI needed to learn. 
 
 ![](images/labeling.jpg)
 
-To follow the tutorial, you can use the following labeled dataset:
-
 ## Increased training efficiency (optional but strongly recommended):
 
 To enhance the training performance, two techniques were applied to the dataset using the roboflow web platform ([https://roboflow.com](https://roboflow.com/)). The first technique involved automatically combining image fragments to improve the detection of small targets. The second technique involved artificially introducing noise into the photos to enhance their resilience to photo artifacts. An example of this is the following image with 5% noise.
 
 ![](images/improvements_example.jpg)
 
-After applying these improvements, in our case, we got 1251 photos for training and 55 photos for validation.
+To follow the tutorial, you can use the following labeled dataset:
+
+[labeled_drosophila_dataset](https://www.google.com/url?q=https%3A%2F%2Fdrive.google.com%2Ffile%2Fd%2F1ftwAVHFSc5U7Qbph5NYCqZL7h1Yp6J5m%2Fview%3Fusp%3Dsharing)
 
 ## Google Colab preparation
 
@@ -89,7 +89,7 @@ The first step is to change the runtime type because we will need to use a GPU. 
 
 In a code block, you should add the following lines:
 
-``` Python
+``` python
 from google.colab import drive
 drive.mount("/content/gdrive")
 ```
@@ -100,7 +100,7 @@ When you run this code block with the play button, it will ask for some permissi
 
 When connecting to the environment, Google Colab already has numerous libraries loaded for both Python and R. However, in our case, to avoid conflicts between packages, we are going to create a virtual environment using Miniconda. To do this, we need to add the following lines to a code block and execute it:
 
-``` Python
+``` python
 %env PYTHONPATH = # /env/python
 !wget https://repo.anaconda.com/miniconda/Miniconda3-py38_4.12.0-Linux-x86_64.sh
 !chmod +x Miniconda3-py38_4.12.0-Linux-x86_64.sh
@@ -113,7 +113,7 @@ sys.path.append('/usr/local/lib/python3.8/site-packages')
 
 This will create a virtual environment called `tensorflowenv` with Python 3.8. Next, in another code block, we will insert the necessary packages and install them by running the code cell:
 
-``` Python
+``` python
 %%shell
 eval "$(conda shell.bash hook)"
 conda activate tensorflowenv
@@ -127,7 +127,7 @@ Although the package versions are old, they are the ones we have tested and conf
 
 To generate the Python script, in a cell we will include the following lines of code for Import of necessary libraries:
 
-``` Python
+``` python
 %%writefile  training.py
 import numpy as np
 import os
@@ -152,7 +152,7 @@ Using `%%writefile training.py` creates a temporary script named `traing.py`.
 
 Continuing with the script, we add the remaining lines of code that will perform the training, pre-exportation validation, and post-exportation validation of the model:
 
-``` Python
+``` python
 %%writefile  -a training.py
 # pathways and name of tensorflow lite model
 training_path = "/content/gdrive/MyDrive/drosophila_white_wild_v7_V2/training"
@@ -193,16 +193,40 @@ Using `%%writefile -a training.py` adds the remaining lines of code to the tempo
 
 In Google Drive, you should have the folders specified in this part of the code with the dataset:
 
-``` Python
+``` python
 training_path = "/content/gdrive/MyDrive/drosophila_white_wild_v7_V2/training"
 validation_path ="/content/gdrive/MyDrive/drosophila_white_wild_v7_V2/validation"
 ```
 
 The variable `tflite_filename` refers to the name that the trained model will have.
 
-In a new code block, we will use the virtual environment tensorflowenv created earlier to execute the temporary script:
+The part of the code where the architecture to be trained is specified is:
 
 ``` Python
+# Selecting the model architecture
+spec = model_spec.get('efficientdet_lite2')
+```
+
+There are 5 different types of models, some smaller and faster, and others larger and slower for performing inference. Additionally, the larger ones require more GPU resources:
+
+```{r echo=FALSE}
+
+model <- c("EfficientDet-Lite0", "EfficientDet-Lite1", "EfficientDet-Lite2", "EfficientDet-Lite3", "EfficientDet-Lite4")
+size_mb <- c(4.4, 5.8, 7.2, 11.4, 19.9)
+latency_ms <- c(37, 49, 69, 116, 260)
+average_precision <- c("25.69%", "30.55%", "33.97%", "37.70%", "41.96%")
+
+
+df <- data.frame(Model = model, `Size(MB)` = size_mb, `Latency(ms)` = latency_ms, `Average Precision` = average_precision)
+
+
+print(df)
+
+```
+
+In a new code block, we will use the virtual environment tensorflowenv created earlier to execute the temporary script:
+
+``` python
 %%shell
 eval "$(conda shell.bash hook)"
 conda activate tensorflowenv
@@ -213,10 +237,12 @@ python3 training.py
 
 To export the model from Google Colab, you can do it with the following code:
 
-``` Python
+``` python
 from google.colab import files
 tflite_filename="drosophila_lite2_epochs120_batch16_img1251_wild_white_v7_V2.tflite"
 files.download(tflite_filename)
 ```
 
 The name of the model established previously must match with `tflite_filename`.
+
+# Image processing with pre-trained tensorflow model
