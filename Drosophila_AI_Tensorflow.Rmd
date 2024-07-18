@@ -49,6 +49,8 @@ n = 20 # number of pieces
 image_slicer.slice(path, n)
 ```
 
+The captured images in this format, which can be used for the tutorial, are available at the following link:
+
 After this, the images will be divided into three different folders using another Python code:
 
 ``` Python
