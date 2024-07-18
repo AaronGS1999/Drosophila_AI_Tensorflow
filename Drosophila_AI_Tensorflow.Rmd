@@ -80,13 +80,13 @@ To follow the tutorial, you can use the following labeled dataset:
 
 [labeled_drosophila_dataset](https://www.google.com/url?q=https%3A%2F%2Fdrive.google.com%2Ffile%2Fd%2F1ftwAVHFSc5U7Qbph5NYCqZL7h1Yp6J5m%2Fview%3Fusp%3Dsharing)
 
-## Google Colab preparation
+## Google Colab preparation for training models
 
 In the following link, there is already a [Google Colab](https://colab.research.google.com/drive/1SdoGigd8u9fq0PAgp6AqXftFHUAuaNqb?usp=sharing) prepared to train Tensorflow models, but here we will explain it step by step.
 
 The first step is to change the runtime type because we will need to use a GPU. To do this, click on Runtime \> Change runtime type at the top, and a menu will open where you can select a GPU.
 
-## Mount google drive on Google Colab notebook
+### Mount google drive on Google Colab notebook
 
 In a code block, you should add the following lines:
 
@@ -97,7 +97,7 @@ drive.mount("/content/gdrive")
 
 When you run this code block with the play button, it will ask for some permissions, and after granting them, you will have a connection between the Google Colab notebook and Drive. Finally, we connect to Google's resources by clicking the connect button.
 
-## Virtual environment preparation
+### Virtual environment preparation
 
 When connecting to the environment, Google Colab already has numerous libraries loaded for both Python and R. However, in our case, to avoid conflicts between packages, we are going to create a virtual environment using Miniconda. To do this, we need to add the following lines to a code block and execute it:
 
@@ -124,7 +124,7 @@ conda install -c conda-forge cudatoolkit=11.2 cudnn=8.1.0 -y
 
 Although the package versions are old, they are the ones we have tested and confirmed to work.
 
-## Generating the Python script and execute it
+### Generating the Python script and execute it
 
 To generate the Python script, in a cell we will include the following lines of code for Import of necessary libraries:
 
@@ -282,7 +282,7 @@ conda activate tensorflowenv
 python3 training.py
 ```
 
-## Export model
+### Export model
 
 To export the model from Google Colab, you can do it with the following code:
 
@@ -299,3 +299,95 @@ The name of the model established previously must match with `tflite_filename`.
 Numerous models have been trained with different datasets as can be seen [here](https://github.com/AaronGS1999/Drosophila_AI_Tensorflow/tree/bb9daa4bdf4ee11b76e887b3137faa154f2456af/Trained%20models). However, the five available architectures trained with our most longest dataset are located [here](https://github.com/AaronGS1999/Drosophila_AI_Tensorflow/tree/bb9daa4bdf4ee11b76e887b3137faa154f2456af/best%20models). The metrics for these can be seen [here](https://github.com/AaronGS1999/Drosophila_AI_Tensorflow/blob/51b1227b677977c161fffda169c258ba2c979107/results/COCO_metrics.xlsx).
 
 # Image processing with pre-trained tensorflow model
+
+In the following link, there is already a [Google Colab](https://colab.research.google.com/drive/1yYFuL3nnxHVXfjSvsRz-pFrDTsFPO2Y7?usp=sharing) prepared to to process images with Tensorflow models, but here we will explain it step by step.
+
+## Drive preparation
+
+For the correct operation it is necessary that you have a folder called 'Image_Processing_Approach' in your google drive with the image you want to process and the trained model.
+
+For example, you can use the following image:
+
+![](images/01.JPG)
+
+And one of the trained models such as [drosophila_lite2_epochs120_batch16_img1251_wild_white_v7_V2.tflite](https://github.com/AaronGS1999/Drosophila_AI_Tensorflow/blob/128990882b9712df3c54cc6853f475752aa4a1fb/best%20models/drosophila_lite2_epochs120_batch16_img1251_wild_white_v7_V2.tflite)
+
+## Google Colab preparation for image processing with a tensorflow model
+
+### Mount google drive on Google Colab notebook
+
+In a code block, you should add the following lines:
+
+``` Python
+from google.colab import drive
+drive.mount("/content/gdrive")
+```
+
+### Virtual environment preparation
+
+When connecting to the environment, Google Colab already has numerous libraries loaded for both Python and R. However, in our case, to avoid conflicts between packages, we are going to create a virtual environment using Miniconda. To do this, we need to add the following lines to a code block and execute it:
+
+``` Python
+%env PYTHONPATH = # /env/python
+!wget https://repo.anaconda.com/miniconda/Miniconda3-py38_4.12.0-Linux-x86_64.sh
+!chmod +x Miniconda3-py38_4.12.0-Linux-x86_64.sh
+!./Miniconda3-py38_4.12.0-Linux-x86_64.sh -b -f -p /usr/local
+!conda update conda -y
+import sys
+sys.path.append('/usr/local/lib/python3.8/site-packages')
+!conda create -n tensorflowenv python=3.8 -y
+```
+
+This will create a virtual environment called `tensorflowenv` with Python 3.8. Next, in another code block, we will insert the necessary packages and install them by running the code cell:
+
+``` Python
+%%shell
+eval "$(conda shell.bash hook)"
+conda activate tensorflowenv
+pip install tflite-model-maker==0.3.4 tflite-support==0.3.1 tensorflow==2.6.0 keras==2.6.0 tensorflow-estimator==2.6.0 image-slicer
+pip uninstall opencv-python-headless -y
+pip install opencv-contrib-python-headless==4.5.4.60
+conda install -c conda-forge cudatoolkit=11.2 cudnn=8.1.0 -y
+```
+
+### Generating the Python script and execute it
+
+To generate the Python script, in a cell we will include the following lines of code for Import of necessary libraries:
+
+``` Python
+%%writefile  drosophilatensorflow.py
+# Required libraries
+import os
+import errno
+import time
+import numpy as np
+from numpy import RAISE
+import cv2
+from tflite_support import metadata
+import tensorflow as tf
+import platform
+from typing import List, NamedTuple
+import json
+from PIL import Image
+import pandas as pd
+import image_slicer
+from pathlib import Path
+
+Interpreter =tf.lite.Interpreter
+load_delegate = tf.lite.experimental.load_delegate
+selec = 0
+```
+
+Using `%%writefile  drosophilatensorflow.py` creates a temporary script named drosophilatensorflow.py.
+
+The next step is to add the lines of code with the paths to the Drive files to the temporary script:
+
+``` Python
+%%writefile -a drosophilatensorflow.py
+path_folder = "/content/gdrive/MyDrive/Image_Processing_Approach"
+path_folder2 = "/content/gdrive/MyDrive/Image_Processing_Approach/processed"
+INPUT_IMAGENAME = "/01.JPG"
+cont = 21
+```
+
+cont is a necessary variable to fragment the image. If you don't have those same paths on Drive, you'll need to modify them.
