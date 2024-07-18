@@ -245,4 +245,8 @@ files.download(tflite_filename)
 
 The name of the model established previously must match with `tflite_filename`.
 
+## Trained models
+
+Numerous models have been trained with different datasets as can be seen [here](https://github.com/AaronGS1999/Drosophila_AI_Tensorflow/tree/bb9daa4bdf4ee11b76e887b3137faa154f2456af/Trained%20models). However, the five available architectures trained with our most comprehensive dataset are located [here](https://github.com/AaronGS1999/Drosophila_AI_Tensorflow/tree/bb9daa4bdf4ee11b76e887b3137faa154f2456af/best%20models).
+
 # Image processing with pre-trained tensorflow model
