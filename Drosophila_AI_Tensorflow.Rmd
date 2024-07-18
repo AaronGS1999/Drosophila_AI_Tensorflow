@@ -51,6 +51,8 @@ image_slicer.slice(path, n)
 
 The captured images in this format, which can be used for the tutorial, are available at the following link:
 
+[drosophila_dataset](https://github.com/AaronGS1999/Drosophila_AI_Tensorflow/tree/9eeaae8ef404b722e6c874bfb10421835c86281b/images/drosophila_images_v5)
+
 After this, the images will be divided into three different folders using another Python code:
 
 ``` Python
@@ -66,6 +68,8 @@ This code will divide the images into 3 folders: 80% of the total images will be
 The last step in dataset preparation was to define what the AI needed to learn. This was done using the open-source program LabelImage (<https://github.com/tzutalin/labelImg>). The program allows flies to be labeled and classified as wild type or white type in a graphical interface. An .xml file is generated in pascal voc format, which records the label and coordinates of the flies in the image. This labeling process is done for all images in the training and validation folders.
 
 ![](images/labeling.jpg)
+
+To follow the tutorial, you can use the following labeled dataset:
 
 ## Increased training efficiency (optional but strongly recommended):
 
