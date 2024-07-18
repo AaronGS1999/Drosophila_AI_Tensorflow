@@ -35,9 +35,13 @@ Next, we will explain how to train a TensorFlow model in Google Colab to detect 
 
 ## Dataset preparation
 
-First of all, you need a set of photographs that include the flies. To capture the pictures, we used a Bysameyee 8-SA-00 digital microscope, which provides more detailed photos. Additionally, we used a Canon EOS 70D camera with a 100mm macro objective f/2.8L lens in the experiment. We also used cardboard of different colors as backgrounds, which helped to improve accuracy. The images from the Canon camera were quite large and couldn't be processed by the model, so they were divided into equally sized fragments using a Python code:
+First of all, you need a set of photographs that include the flies. To capture the pictures, we used a Bysameyee 8-SA-00 digital microscope, which provides more detailed photos. Additionally, we used a Canon EOS 70D camera with a 100mm macro objective f/2.8L lens in the experiment. We also used cardboard of different colors as backgrounds, which helped to improve accuracy. The images from the Canon camera were quite large and couldn't be processed by the model, so they were divided into equally sized fragments using a Python code and the photographs were taken on a printed grid:
 
-```{python}
+![](images/grid.jpg){width="552"}
+
+![](images/scale.jpg){width="552"}
+
+``` Python
 import image_slicer
 from PIL import Image
 path = "" # add the full path of the image
@@ -47,10 +51,10 @@ image_slicer.slice(path, n)
 
 After this, the images will be divided into three different folders using another Python code:
 
-```{python}
+``` Python
 import splitfolders
-folder = "" # Add the address of your folders, keep in mind that they must have a specific structure of the library
-splitfolders.ratio(folder, output="output", seed=1999, ratio=(.8, 0.1, 0.1)) 
+folder = "" # Add the address of your folders
+splitfolders.ratio(folder, output="output", seed=1999, ratio=(.8, 0.1, 0.1))
 ```
 
 This code will divide the images into 3 folders: 80% of the total images will be used for training the model, 10% for validation during training, and 10% will be reserved for external checks.
