@@ -451,7 +451,6 @@ class ObjectDetectorOptions(NamedTuple):
   score_threshold: float = 0.0
 
 
-
 class Rect(NamedTuple):
   left: float
   top: float
