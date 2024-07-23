@@ -34,7 +34,7 @@ TensorFlow is an open-source machine learning framework developed by Google. It 
 
 If you aim to run the model using our sample dataset or using private\
 images containing white and wild Drosophila, please follow indications of\
-section 1. If you aim to run the model using images belonging to a\
+section 2. If you aim to run the model using images belonging to a\
 different material, please follow indications of section 3.
 
 # Training a TensorFlow model in Google Colab
