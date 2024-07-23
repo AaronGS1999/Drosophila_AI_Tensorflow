@@ -30,13 +30,20 @@ The first thing is to have a Google account, and to access Google Colab, it's as
 
 TensorFlow is an open-source machine learning framework developed by Google. It allows users to build and train various machine learning models, ranging from simple to complex, using computational graphs. TensorFlow is widely used for tasks such as classification, regression, neural networks, and more, across different platforms and devices.
 
+## Initial guidelines
+
+If you aim to run the model using our sample dataset or using private\
+images containing white and wild Drosophila, please follow indications of\
+section 1. If you aim to run the model using images belonging to a\
+different material, please follow indications of section 3.
+
 # Training a TensorFlow model in Google Colab
 
 Next, we will explain how to train a TensorFlow model in Google Colab to detect objects, specifically distinguishing between wild-type flies and white-type flies. Also, in the following sections, datasets will be provided for labeling or a dataset already labeled and ready to be uploaded to Drive and used for training.
 
 ## Dataset preparation
 
-First of all, you need a set of photographs that include the flies. To capture the pictures, we used a Bysameyee 8-SA-00 digital microscope, which provides more detailed photos. Additionally, we used a Canon EOS 70D camera with a 100mm macro objective f/2.8L lens in the experiment. We also used cardboard of different colors as backgrounds, which helped to improve accuracy. The images from the Canon camera were quite large and couldn't be processed by the model, so they were divided into equally sized fragments using a Python code and the photographs were taken on a printed grid:
+First of all, you need a set of photographs that include the flies. To capture the pictures, we used a Bysameyee 8-SA-00 digital microscope, which provides more detailed photos. Additionally, we used a Canon EOS 70D camera with a 100mm macro objective f/2.8L lens in the experiment. We also used cardboard of different colors as backgrounds, which helped to improve accuracy. The images from the Canon camera were quite large and couldn't be processed by the model, so they were divided into equally sized fragments using a Python code and the photographs were taken on a [printed grid](https://github.com/AaronGS1999/Drosophila_AI_Tensorflow/blob/f5262b1725e16c7f89c9395dccde7e97a1f9f4de/grid.docx):
 
 ![](images/grid.jpg){width="552"}
 
@@ -306,7 +313,7 @@ In the following link, there is already a [Google Colab](https://colab.research.
 
 For the correct operation it is necessary that you have a folder called 'Image_Processing_Approach' in your google drive with the image you want to process and the trained model.
 
-For example, you can use the following image:
+For example, you can use the following [image](https://github.com/AaronGS1999/Drosophila_AI_Tensorflow/blob/f5262b1725e16c7f89c9395dccde7e97a1f9f4de/images/01.JPG):
 
 ![](images/01.JPG)
 
@@ -969,3 +976,5 @@ To process another image, you should place it in Google Drive and execute the co
     conda activate tensorflowenv
     python3 restore.py
     ```
+
+# Processing Images from the Internet
