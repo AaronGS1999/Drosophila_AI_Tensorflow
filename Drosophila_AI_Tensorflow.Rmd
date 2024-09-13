@@ -59,7 +59,7 @@ image_slicer.slice(path, n)
 
 The captured images in this format, which can be used for the tutorial, are available at the following link:
 
-[drosophila_dataset](https://github.com/AaronGS1999/Drosophila_AI_Tensorflow/tree/9eeaae8ef404b722e6c874bfb10421835c86281b/images/drosophila_images_v5)
+[drosophila_dataset](https://github.com/AaronGS1999/Drosophila_AI_Tensorflow/tree/70fd04e81cd6304cd9c39ef2b3c98361d694e80d/images/drosophila_images_v5)
 
 After this, the images will be divided into three different folders using another Python code:
 
